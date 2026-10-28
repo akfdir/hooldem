@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<script>try{var s=JSON.parse(localStorage.hs||"{}"),t=s.theme||"dark";if(t=="auto")t=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";document.documentElement.dataset.theme=t}catch(e){}</script>
+<title>HOLD'EM</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7'/><text x='6' y='25' font-size='24' fill='white'>♠</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@1,900&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+:root{--cw:clamp(30px,5vw + 14px,56px);--ln:#2a2a2a;--lnh:#666;--ln2:#333;--mu:#8c8c8c;--rd:#ef3b54;
+--bg:#000;--fg:#fff;--p1:#111;--p1h:#1c1c1c;--p2:#0d0d0d;--p3:#0c0c0c;--ac:#fff;--acf:#000;--ach:#ddd;
+--g1:#555;--g2:#fff;--f1:#222;--f2:#060606;--fb:#3a3a3a;--fs:#ffffff10;--is:#000;--gl:#fff;--gl2:#fff8;--gl3:#fffc;--msg:#1a1a1a;--bar:#222;--sh:#000a;color-scheme:dark}
+:root[data-theme=light]{--ln:#d3d3cf;--lnh:#9a9a95;--ln2:#cfcfca;--mu:#6a6a66;--rd:#d92d46;--bg:#f2f1ed;--fg:#0b0b0b;--p1:#fff;--p1h:#e9e8e3;--p2:#fff;--p3:#fff;--ac:#0b0b0b;--acf:#fff;--ach:#333;
+--g1:#bbb;--g2:#111;--f1:#fdfdfb;--f2:#d9d8d2;--fb:#b9b8b2;--fs:#00000014;--is:#0002;--gl:#0004;--gl2:#0005;--gl3:#0007;--msg:#e4e3de;--bar:#d3d3cf;--sh:#0003;color-scheme:light}
+html,body{height:100%;background:var(--bg);color:var(--fg);font:600 14px Manrope,system-ui,sans-serif;overflow:hidden;user-select:none}
+.scr{position:fixed;inset:0;display:none;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.scr.on{display:flex}
+button,input{font:inherit;color:var(--fg)}
+button{cursor:pointer;border:1px solid var(--ln);background:var(--p1);border-radius:12px;padding:0 18px;height:46px;transition:.15s}
+button:hover{background:var(--p1h);border-color:var(--lnh)}button:active{transform:scale(.95)}
+button.w{background:var(--ac);color:var(--acf);border-color:var(--ac);font-weight:800}button.w:hover{background:var(--ach)}
+button:disabled{opacity:.35;pointer-events:none}
+input{background:var(--p2);border:1px solid var(--ln);border-radius:12px;height:46px;padding:0 14px;outline:0;width:100%}input:focus{border-color:var(--fg)}
+.sub{color:var(--mu);text-align:center;padding:14px}
+#st{align-items:center;justify-content:center;gap:14px;text-align:center;overflow:hidden}
+#st>*{z-index:1}.bx{width:min(340px,86vw);display:flex;flex-direction:column;gap:10px}
+.logo{font:italic 900 clamp(46px,13vw,110px)/1 'Bodoni Moda',serif;letter-spacing:.04em}
+.logo span{display:inline-block;background:linear-gradient(100deg,var(--g1) 20%,var(--g2) 45%,var(--g1) 70%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sh 3s linear infinite,pop .8s cubic-bezier(.2,1.6,.4,1) both;animation-delay:0s,calc(var(--i)*.09s)}
+@keyframes sh{to{background-position:-300% 0}}
+@keyframes pop{from{transform:translateY(40px) rotate(12deg) scale(.3);opacity:0}}
+@keyframes in{from{transform:scale(.6);opacity:0}}
+.fl{position:absolute;bottom:-10%;color:var(--fg);opacity:.07;animation:fl linear infinite;z-index:0!important}
+@keyframes fl{to{transform:translateY(-120vh) rotate(360deg)}}
+#lb{align-items:center;padding-top:28px;gap:14px;overflow:auto}
+.pl{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:560px;padding:0 14px}
+.av{width:92px;padding:12px 6px;border:1px solid var(--ln);border-radius:14px;background:var(--p2);text-align:center;animation:in .4s both}
+.av b{display:grid;place-items:center;width:40px;height:40px;margin:0 auto 6px;border-radius:50%;background:var(--ac);color:var(--acf);font-size:18px}
+.av div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#top{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;color:var(--mu);font-size:12px}#top b{color:var(--fg);letter-spacing:.1em}
+#tbl{position:relative;flex:1;min-height:0;margin:0 6px}
+#felt{position:absolute;inset:9% 7%;border-radius:50%;background:radial-gradient(ellipse at 50% 40%,var(--f1),var(--f2) 75%);border:1px solid var(--fb);box-shadow:0 0 60px var(--fs),inset 0 0 50px var(--is)}
+#ctr{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:8px;z-index:2}
+#pot{font-weight:800;font-size:clamp(14px,2vw + 8px,20px);padding:4px 14px;border-radius:99px;background:var(--bg);border:1px solid var(--lnh)}
+.brd{display:flex;gap:4px;min-height:calc(var(--cw)*1.4)}
+.ban{text-align:center;font-weight:800;font-size:clamp(14px,3vw + 6px,24px);animation:bn .7s cubic-bezier(.2,1.5,.4,1) both;text-shadow:0 0 18px var(--gl)}
+.ban small{display:block;font-size:12px;color:var(--mu);text-shadow:none}
+@keyframes bn{from{transform:scale(3);opacity:0}}
+.card{width:var(--cw);height:calc(var(--cw)*1.4);perspective:600px;flex:none}
+.in{position:relative;width:100%;height:100%;transform-style:preserve-3d}
+.dn .in{transform:rotateY(180deg)}
+.fr,.bk{position:absolute;inset:0;border-radius:calc(var(--cw)*.14);backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 4px 14px var(--sh)}
+.fr{background:#fff;color:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;font:800 calc(var(--cw)*.4)/1 Manrope,sans-serif}
+.fr i{font-style:normal;font-size:calc(var(--cw)*.5)}.fr.r{color:var(--rd)}
+.bk{transform:rotateY(180deg);background:repeating-linear-gradient(45deg,#111 0 4px,#222 4px 8px);border:2px solid #fff}
+.card.a{animation:dl .55s cubic-bezier(.2,.9,.3,1) var(--d) both}
+.card.a:not(.dn) .in{animation:fp .6s ease var(--d) both}
+@keyframes dl{from{transform:translate(var(--fx),var(--fy)) scale(.35) rotate(-220deg);opacity:0}}
+@keyframes fp{from{transform:rotateY(180deg)}}
+.seat{position:absolute;transform:translate(-50%,-50%);width:clamp(58px,15vw,92px);text-align:center;z-index:3;transition:opacity .3s}
+.cs{display:flex;justify-content:center;gap:2px;--cw:clamp(16px,4vw,26px);min-height:calc(var(--cw)*1.4);margin-bottom:-6px;position:relative;z-index:1}
+.pn{background:var(--p3);border:1px solid var(--ln2);border-radius:11px;padding:4px 3px 5px;overflow:hidden;font-size:clamp(10px,2.6vw,12px)}
+.pn .nm,.pn .ch,.pn .lb2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch{color:var(--mu)}.lb2{font-size:10px;color:var(--mu);min-height:12px}
+.seat.t .pn{border-color:var(--fg);animation:pu 1s ease-in-out infinite}
+@keyframes pu{50%{box-shadow:0 0 22px var(--gl2)}}
+.seat.f{opacity:.35}
+.seat.w .pn{background:var(--ac);color:var(--acf);animation:wn .8s ease-in-out infinite alternate}.seat.w .ch,.seat.w .lb2{color:var(--acf)}
+@keyframes wn{to{box-shadow:0 0 34px 6px var(--gl3);transform:scale(1.08)}}
+.tb{height:3px;background:var(--bar);margin-top:3px;border-radius:2px}.tb i{display:block;height:100%;background:var(--fg);border-radius:2px}
+.db{position:absolute;top:-4px;right:-4px;z-index:4;width:18px;height:18px;border-radius:50%;background:var(--ac);color:var(--acf);font:800 10px/18px Manrope;text-decoration:none;animation:in .4s both}
+.bt{position:absolute;transform:translate(-50%,-50%);z-index:2;font-size:11px;background:var(--bg);border:1px solid var(--lnh);border-radius:99px;padding:2px 8px;animation:in .3s both}
+#dock{padding:6px 12px 12px;display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;width:100%;max-width:640px;margin:0 auto}
+#mc{display:flex;flex-direction:column;align-items:center;gap:4px}
+.kh{opacity:.55;font-size:10px;margin-left:6px;border:1px solid currentColor;border-radius:4px;padding:0 4px}
+@media(hover:none){.kh{display:none}}
+#mine{display:flex;gap:6px;--cw:clamp(40px,11vw,62px);min-height:calc(var(--cw)*1.4)}
+#hn{font-size:12px;color:var(--mu);min-height:16px}
+#act{display:flex;flex-direction:column;gap:6px;min-width:0}
+#act .r{display:flex;gap:6px}#act .r>*{flex:1;padding:0 6px;min-width:0}
+input[type=range]{accent-color:var(--fg);height:28px;padding:0;border:0;background:none}
+input{user-select:text;-webkit-user-select:text}#act button,#act input{height:40px}
+.cfg{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:min(420px,90vw)}
+.cfg label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mu);padding:10px;border:1px solid var(--ln);border-radius:12px;background:var(--p2)}
+.cfg b{color:var(--fg);font-size:16px}
+select{background:var(--p2);border:1px solid var(--ln);border-radius:8px;color:var(--fg);height:36px;padding:0 8px;font:inherit;font-size:15px;outline:0}select:focus{border-color:var(--fg)}
+.cb{position:relative;height:30px;padding:0 10px;font-size:14px}
+.ub{position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;border-radius:8px;background:var(--rd);color:#fff;font:800 10px/16px Manrope;font-style:normal;text-align:center;padding:0 3px;animation:in .3s both}
+#cp2{position:fixed;right:0;bottom:0;width:min(380px,100%);height:min(68vh,500px);background:var(--p3);border:1px solid var(--ln2);border-radius:16px 16px 0 0;transform:translateY(105%);transition:transform .3s cubic-bezier(.2,.9,.3,1);z-index:90;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
+#cp2.on{transform:none}
+#cp2 header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--ln)}
+#cl{flex:1;overflow:auto;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.m{max-width:85%;padding:7px 11px;border-radius:14px;background:var(--msg);align-self:flex-start;word-break:break-word;animation:in .25s both;user-select:text;-webkit-user-select:text}
+.m b{display:block;font-size:11px;color:var(--mu)}
+.m.me{align-self:flex-end;background:var(--ac);color:var(--acf)}.m.me b{display:none}
+#cq{display:flex;gap:6px;padding:6px 12px 0}#cq button{height:34px;padding:0 10px;flex:1}
+#cf{display:flex;gap:6px;padding:8px 12px}
+.bub{position:fixed;z-index:97;pointer-events:none;max-width:180px;padding:6px 10px;border-radius:12px;background:var(--ac);color:var(--acf);font-weight:700;font-size:12px;transform:translate(-50%,-100%);animation:bb 4s ease both;word-break:break-word}
+@keyframes bb{0%{opacity:0;transform:translate(-50%,-70%) scale(.5)}8%{opacity:1;transform:translate(-50%,-100%) scale(1)}85%{opacity:1}100%{opacity:0;transform:translate(-50%,-130%)}}
+.fc{position:fixed;left:0;top:0;width:12px;height:12px;border-radius:50%;background:var(--ac);border:3px dashed var(--acf);z-index:99;pointer-events:none;box-shadow:0 0 12px var(--gl)}
+#cv{position:fixed;inset:0;pointer-events:none;z-index:98}
+#ts{position:fixed;top:14px;left:50%;transform:translate(-50%,-80px);background:var(--ac);color:var(--acf);padding:10px 18px;border-radius:99px;font-weight:800;z-index:99;opacity:0}
+#ts.s{animation:ts 2.4s ease both}@keyframes ts{10%,85%{transform:translate(-50%,0);opacity:1}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-delay:0s!important}}
+
+/* 라이트 모드: 카드 윤곽 */
+:root[data-theme=light] .fr{border:1px solid #c9c9c4}
+/* 설정 버튼 */
+.gb{width:46px;padding:0;display:inline-grid;place-items:center}
+.gb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#top .gb{height:30px;width:34px}
+/* 설정 패널 */
+#sp{position:fixed;inset:0;z-index:100;background:#0009;display:none;align-items:center;justify-content:center;padding:14px}
+#sp.on{display:flex}
+.sc{width:min(420px,100%);max-height:92vh;overflow:auto;background:var(--p3);border:1px solid var(--ln2);border-radius:18px;animation:in .25s both;user-select:none}
+.sc header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--ln);position:sticky;top:0;background:var(--p3);z-index:1;font-size:16px}
+.sc section{padding:14px 16px;border-bottom:1px solid var(--ln);display:flex;flex-direction:column;gap:10px}
+.sc section:last-child{border-bottom:0}
+.sc h4{font-size:12px;color:var(--mu);font-weight:700}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.row input[type=range]{flex:1;min-width:0}.row em{font-style:normal;width:30px;text-align:right;color:var(--mu)}
+.row input:not([type=range]){flex:1;min-width:0}.row button{flex:none}
+input:disabled{opacity:.35}
+.sw{width:50px;height:28px;padding:0;border-radius:99px;position:relative;background:var(--bar)}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--mu);transition:.2s}
+.sw[aria-pressed=true]{background:var(--ac);border-color:var(--ac)}
+.sw[aria-pressed=true]::after{left:25px;background:var(--acf)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg button{height:40px;padding:0}
+.seg button.on{background:var(--ac);color:var(--acf);border-color:var(--ac)}
+.pg{height:6px;border-radius:99px;background:var(--bar);overflow:hidden}
+.pg i{display:block;height:100%;background:var(--fg);border-radius:99px;transition:width .4s}
+.small{font-size:12px;color:var(--mu);line-height:1.6}.small b{color:var(--fg)}
+details summary{cursor:pointer;color:var(--mu);font-size:13px}
+.rec{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--mu)}
+/* 칭호 */
+.tw{min-height:14px;line-height:1;margin-bottom:2px}
+.tt{position:relative;display:inline-block;max-width:100%;padding:1px 6px;border-radius:99px;font-size:clamp(8px,2.2vw,10px);font-weight:800;line-height:1.35;white-space:nowrap;letter-spacing:.02em;vertical-align:middle}
+.tt.lg{font-size:13px;padding:2px 12px}
+.tx{font-weight:800}
+.t1{background:#2a2a2a;color:#c4c4c4;border:1px solid #4a4a4a}
+.t2{background:#0f2f4d;color:#8fcbff;border:1px solid #2c6fa8}
+.t3{background:#1b1304;border:1px solid #c99a1c;animation:tg3 1.8s ease-in-out infinite alternate}
+.t3 .tx{background:linear-gradient(100deg,#c9961a 20%,#fff7c8 46%,#ffd54a 54%,#c9961a 80%) 0 0/300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:tsh 2.2s linear infinite}
+.t4{background:#0e0820;border:1px solid #b46bff;animation:tg4 1.4s ease-in-out infinite alternate}
+.t4 .tx{background:linear-gradient(100deg,#ff5e7e,#ffd34d,#5effa0,#5ec8ff,#c58bff,#ff5e7e) 0 0/300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:tsh 2.4s linear infinite}
+.t3::before,.t3::after,.t4::before,.t4::after,.t5::before,.t5::after{content:'✦';position:absolute;pointer-events:none;color:#fff;text-shadow:0 0 5px #ffd54a,0 0 9px #ffd54a;font-size:.9em;line-height:1;opacity:0;animation:twk 1.7s ease-in-out infinite}
+.t3::before,.t4::before,.t5::before{top:-4px;left:2px}
+.t3::after,.t4::after,.t5::after{bottom:-4px;right:1px;animation-delay:.85s;font-size:.75em}
+.t4::before,.t4::after{text-shadow:0 0 5px #c58bff,0 0 9px #c58bff}
+.t5::before,.t5::after{text-shadow:0 0 5px #2dff95,0 0 9px #2dff95}
+.t5{background:#031a10;border:1px solid #2dff95;font-family:ui-monospace,Menlo,Consolas,monospace;animation:tg5 1.6s ease-in-out infinite alternate}
+.t5 .tx{background:linear-gradient(100deg,#2dff95 20%,#e6fff2 46%,#31e8ff 54%,#2dff95 80%) 0 0/300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:tsh 2.2s linear infinite}
+.t5.lg .tx::before{content:'</> '}
+@keyframes tsh{to{background-position:-150% 0}}
+@keyframes twk{0%,100%{transform:scale(0) rotate(0);opacity:0}50%{transform:scale(1.3) rotate(90deg);opacity:1}}
+@keyframes tg3{to{box-shadow:0 0 9px 1px #ffd54a99}}
+@keyframes tg4{to{box-shadow:0 0 12px 2px #c58bffaa}}
+@keyframes tg5{to{box-shadow:0 0 10px 1px #2dff9599}}
+@media(prefers-reduced-motion:reduce){.t3::before,.t3::after,.t4::before,.t4::after,.t5::before,.t5::after{animation:none;opacity:.9;transform:none}.t3 .tx,.t4 .tx,.t5 .tx{animation:none}}
+/* 개발자 설정 / 디버그 */
+#dp{position:fixed;inset:0;z-index:101;background:#0009;display:none;align-items:center;justify-content:center;padding:14px}
+#dp.on{display:flex}
+.dg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.dg.c3{grid-template-columns:repeat(3,1fr)}
+.dg button{height:36px;padding:0 4px;font-size:12px}
+.dg button.on{background:var(--ac);color:var(--acf);border-color:var(--ac)}
+#dbg{position:fixed;left:6px;top:calc(env(safe-area-inset-top) + 44px);z-index:95;display:none;pointer-events:none;font:600 10px/1.5 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);color:var(--fg);border:1px solid #2dff95;border-radius:8px;padding:4px 8px;white-space:pre;opacity:.9}
+#gate{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:20px}
+#gate.off{display:none}
+.gtl{font:italic 900 clamp(40px,11vw,84px)/1 'Bodoni Moda',serif;letter-spacing:.04em}
+#gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:min(300px,86vw);background:#fff;color:#111;border-color:#fff;font-weight:800}
+#gbtn:hover{background:#eee;border-color:#eee}
+#gerr{color:var(--rd);min-height:18px;font-size:12px;max-width:86vw}
+.acc{display:flex;gap:12px;align-items:center}
+.acc img,.acc .ph{width:52px;height:52px;border-radius:50%;object-fit:cover;flex:none;background:var(--ac);color:var(--acf);display:grid;place-items:center;font-size:20px;font-weight:800}
+.acc div{min-width:0}.acc b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acc span{display:block;color:var(--mu);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;user-select:text}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:12px}.kv span:first-child{color:var(--mu);flex:none}.kv span:last-child{text-align:right;user-select:text}
+</style></head><body>
+<div id="gate"><div class="gtl">HOLD'EM</div><p style="color:var(--mu)">게임을 하려면 Google 로그인이 필요해요</p><button id="gbtn" disabled><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 12-2.1 16-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg><span>Google로 로그인</span></button><div id="gerr"></div></div>
+<div id="st" class="scr on"><button class="gb" id="gb0" aria-label="설정" style="position:absolute;top:calc(env(safe-area-inset-top) + 10px);right:calc(env(safe-area-inset-right) + 10px)"></button><div class="logo" id="lg"></div><p style="color:var(--mu)">친구들과 즐기는 텍사스 홀덤</p><div class="rec" id="rec"></div>
+<div class="bx"><input id="nm" maxlength="10" placeholder="닉네임"><button class="w" id="mk">방 만들기</button>
+<div style="display:flex;gap:8px"><input id="cd" maxlength="4" placeholder="방 코드" style="text-transform:uppercase"><button id="jn">참가</button></div></div></div>
+<div id="lb" class="scr"></div>
+<div id="gm" class="scr"><div id="top"></div><div id="tbl"></div><div id="dock"><div id="mc"><div id="mine"></div><div id="hn"></div></div><div id="act"></div></div></div>
+<div id="cp2"><header><b>채팅</b><button id="cx" style="height:30px;padding:0 10px">✕</button></header><div id="cl"></div><div id="cq"></div><div id="cf"><input id="ci" maxlength="120" placeholder="메시지 입력" autocomplete="off"><button class="w" id="cs">전송</button></div></div>
+<div id="sp"></div><div id="dp"></div><div id="dbg"></div>
+<div id="ts"></div><canvas id="cv"></canvas>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const PFX='casino-holdem-',MAX=12;let ANTE=20,MINR=10,TL=30000,START=1000;
+const NAMES=['하이카드','원 페어','투 페어','트리플','스트레이트','플러시','풀하우스','포카드','스트레이트 플러시'];
+const rk=c=>'2345678910JQKA'.match(/10|./g)[c%13],SU='♠♥♦♣';
+// ---------- 핸드 평가 ----------
+function sc5(h){const rs=h.map(c=>c%13+2).sort((a,b)=>b-a),fl=h.every(c=>(c/13|0)==(h[0]/13|0)),g={};
+rs.forEach(r=>g[r]=(g[r]||0)+1);const ks=Object.keys(g).map(Number).sort((a,b)=>g[b]-g[a]||b-a);
+const wh=rs[0]==14&&rs[1]==5&&ks.length==5&&rs[4]==2,st=ks.length==5&&(rs[0]-rs[4]==4||wh);
+const t=wh?[5,4,3,2,1]:ks.slice();while(t.length<5)t.push(0);
+const c=st&&fl?8:g[ks[0]]==4?7:g[ks[0]]==3&&g[ks[1]]==2?6:fl?5:st?4:g[ks[0]]==3?3:g[ks[0]]==2&&g[ks[1]]==2?2:g[ks[0]]==2?1:0;
+return [c,...t].reduce((a,x)=>a*15+x,0)}
+function best(cs){let m=0;(function f(i,h){if(h.length==5){m=Math.max(m,sc5(h));return}if(i>=cs.length)return;f(i+1,[...h,cs[i]]);f(i+1,h)})(0,[]);return m}
+const hname=v=>{const c=v/759375|0;return c==8&&(v/50625|0)%15==14?'로열 플러시':NAMES[c]};
+// ---------- 상태 ----------
+let peer,conn,isHost=false,S,V,tm,code,seen=new Set(),pb={},curHand=-1,lastW=-1,ak='',prevPot=0,M=0;
+const me=sessionStorage.pid||(sessionStorage.pid=Math.random().toString(36).slice(2,10));
+let name='';
+const go=id=>document.querySelectorAll('.scr').forEach(e=>e.classList.toggle('on',e.id==id));
+function toast(t){const e=$('#ts');e.textContent=t;e.classList.remove('s');void e.offsetWidth;e.classList.add('s')}
+
+// ---------- 설정 / 사운드 / 테마 / 칭호 ----------
+const GEAR='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+$('#gb0').innerHTML=GEAR;
+const DEF={bgm:1,bv:50,sfx:1,sv:70,theme:'dark',dbg:0,bs:1};let ST;
+try{ST={...DEF,...JSON.parse(localStorage.hs||'{}')}}catch(e){ST={...DEF}}
+const saveST=()=>{try{localStorage.hs=JSON.stringify(ST)}catch(e){}cloudSave({settings:ST})};
+// 테마
+const mq=matchMedia('(prefers-color-scheme: light)');
+function applyTheme(){const t=ST.theme=='auto'?(mq.matches?'light':'dark'):ST.theme;document.documentElement.dataset.theme=t;const m=$('meta[name=theme-color]');if(m)m.content=t=='light'?'#f2f1ed':'#000000'}
+mq.addEventListener&&mq.addEventListener('change',()=>ST.theme=='auto'&&applyTheme());applyTheme();
+// 칭호 (승수 = 한 판이 끝났을 때 최후의 1인이 된 횟수)
+const TT=[[100,'홀덤의 신','t4'],[30,'고수','t3'],[5,'중수','t2'],[0,'초보','t1']];
+const ttl=w=>TT.find(t=>w>=t[0]),cw=x=>{x=parseInt(x);return x>0&&x<1e6?x:0};
+// 개발자 코드: 코드 자체는 저장하지 않고 해시(DK)만 비교해요. 코드를 바꾸려면 콘솔에서 dh('새코드') 값을 DK에 넣으세요.
+const DK='gw7mcw-167hbr2',dh=s=>{let a=5381,b=52711;for(const c of s){const k=c.charCodeAt(0);a=((a*33)^k)>>>0;b=((b*31)+k^(b>>>7))>>>0}return a.toString(36)+'-'+b.toString(36)};
+let DEV=0;try{DEV=localStorage.hdv==DK?1:0}catch(e){}
+const tag=(w,c='',d=0)=>d?`<span class="tt t5 ${c}"><span class="tx">개발자</span></span>`:w==null?'':`<span class="tt ${ttl(w)[2]} ${c}"><span class="tx">${ttl(w)[1]}</span></span>`;
+let myW=0;
+const setW=n=>{myW=n;cloudSave({wins:n});cloudFlush()};
+const recUI=()=>{$('#rec').innerHTML=`내 전적 <b style="color:var(--fg)">${myW}승</b> ${tag(myW,'',DEV)}`};recUI();
+const ck=w=>(w*7919+13)%100003,enc=w=>'HW'+btoa(w+'.'+ck(w)),dec=s=>{try{const[a,b]=atob(String(s).trim().replace(/^HW/,'')).split('.').map(Number);return a>=0&&a<1e6&&ck(a)==b?a:-1}catch(e){return-1}};
+function syncMyW(){recUI();if(isHost){if(S){S.players[0].w=myW;S.players[0].dev=DEV;sync()}}else if(conn&&conn.open)conn.send({t:'w',w:myW,d:DEV})}
+let seenWt='',lastFan='',lastN=0,lastTk='';
+function winCheck(v){if(!v.wid||v.wid!=me||!v.wt||v.wt==seenWt)return;seenWt=v.wt;let l='';try{l=localStorage.lw||''}catch(e){}if(l==v.wt)return;try{localStorage.lw=v.wt}catch(e){}
+lastFan=v.wt;const o=ttl(myW)[1];setW(myW+1);const n=ttl(myW)[1];
+setTimeout(()=>{syncMyW();if(o!=n){toast('🎉 새 칭호 획득: '+n+'!');sfx('title')}else{toast('🏆 우승! 통산 '+myW+'승');sfx('fan')}boom()},0)}
+// ----- 오디오 엔진 (외부 파일 없이 Web Audio로 합성) -----
+let AC,bg,sf,bus,dr,NB,bgT=0,nextT=0,bs=0;const SD=.375,mtof=m=>440*2**((m-69)/12);
+function ac(){if(AC)return AC;try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){return null}
+const cp=AC.createDynamicsCompressor(),ms=AC.createGain();ms.gain.value=.9;ms.connect(cp);cp.connect(AC.destination);
+bg=AC.createGain();sf=AC.createGain();bg.connect(ms);sf.connect(ms);
+bus=AC.createGain();const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3200;bus.connect(lp);lp.connect(bg);
+const dl=AC.createDelay(1),fb=AC.createGain(),wt=AC.createGain(),dp=AC.createBiquadFilter();dl.delayTime.value=SD*3;fb.gain.value=.35;wt.gain.value=.3;dp.type='lowpass';dp.frequency.value=1800;
+lp.connect(dl);dl.connect(dp);dp.connect(fb);fb.connect(dl);dp.connect(wt);wt.connect(bg);
+dr=AC.createGain();dr.connect(bg);
+NB=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+AC.onstatechange=()=>{if(AC.state=='running')bgm()};vol();return AC}
+function vol(){if(!AC)return;const t=AC.currentTime;bg.gain.setTargetAtTime(ST.bgm?Math.pow(ST.bv/100,1.5)*.5:0,t,.05);sf.gain.setTargetAtTime(ST.sfx?Math.pow(ST.sv/100,1.6):0,t,.03)}
+function tone(f,t,d,o={}){const{type='sine',v:vv=.2,a=.005,f2,out=sf}=o,x=AC.createOscillator(),g=AC.createGain();x.type=type;x.frequency.setValueAtTime(f,t);if(f2)x.frequency.exponentialRampToValueAtTime(f2,t+d);
+g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vv,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+d);x.connect(g);g.connect(out);x.start(t);x.stop(t+d+.05)}
+function nz(t,d,o={}){const{f=3000,f2,q=1,type='bandpass',v:vv=.2,a=.003,out=sf}=o,s=AC.createBufferSource(),fl=AC.createBiquadFilter(),g=AC.createGain();s.buffer=NB;fl.type=type;fl.Q.value=q;fl.frequency.setValueAtTime(f,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+d);
+g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vv,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+d);s.connect(fl);fl.connect(g);g.connect(out);s.start(t,Math.random()*.5);s.stop(t+d+.05)}
+const clink=(t,k=1)=>{const b=2200+Math.random()*900;[1,1.52,2.1].forEach((m,i)=>tone(b*m,t,.13-i*.02,{v:.07*k/(i+1)+.015,a:.001}));nz(t,.03,{f:7000,q:.6,type:'highpass',v:.1*k})};
+const FX={
+click:t=>tone(1100,t,.05,{type:'triangle',v:.1,f2:700}),
+deal:t=>{nz(t,.1,{f:5200,f2:2000,q:.7,v:.28});tone(220,t,.06,{v:.06,f2:120})},
+call:t=>{clink(t);clink(t+.05,.9);clink(t+.1,.7)},
+raise:t=>{for(let i=0;i<5;i++)clink(t+i*.05,1-i*.08);tone(500,t,.25,{type:'triangle',v:.06,f2:900})},
+allin:t=>{for(let i=0;i<9;i++)clink(t+i*.05,.9);tone(250,t,.5,{type:'sawtooth',v:.04,f2:1100})},
+check:t=>[0,.11].forEach(d=>{tone(150,t+d,.1,{v:.35,f2:60,a:.002});nz(t+d,.05,{f:900,q:.8,v:.12})}),
+fold:t=>{nz(t,.28,{f:3000,f2:400,q:.6,v:.22,a:.02});tone(200,t,.2,{v:.06,f2:90})},
+turn:t=>{tone(880,t,.4,{v:.2});tone(1318.5,t+.13,.55,{v:.18});tone(1760,t+.13,.3,{v:.05})},
+win:t=>{[523.25,659.25,783.99,1046.5].forEach((f,i)=>{tone(f,t+i*.09,.5,{type:'triangle',v:.2});tone(f*2,t+i*.09,.3,{v:.04})});for(let i=0;i<6;i++)clink(t+.3+i*.06,.7)},
+pot:t=>{for(let i=0;i<5;i++)clink(t+i*.07,.8)},
+fan:t=>{[523.25,659.25,783.99,1046.5,1318.5,1568].forEach((f,i)=>{tone(f,t+i*.1,.9,{type:'triangle',v:.18});tone(f/2,t+i*.1,.9,{v:.08})});[523.25,659.25,783.99,1046.5].forEach(f=>tone(f,t+.7,1.6,{type:'triangle',v:.12}));for(let i=0;i<12;i++)clink(t+.5+i*.07,.8)},
+end:t=>[392,329.63,261.63].forEach((f,i)=>tone(f,t+i*.18,.6,{type:'triangle',v:.16})),
+chat:t=>tone(520,t,.12,{v:.16,f2:900}),
+join:t=>{tone(520,t,.1,{v:.14});tone(780,t+.08,.14,{v:.14})},
+title:t=>{FX.fan(t);for(let i=0;i<14;i++)tone(2000+Math.random()*2600,t+.4+i*.09,.25,{v:.05})}};
+FX.chip=t=>{clink(t);clink(t+.045,.8)};
+function sfx(k,dl=0){if(!AC||!ST.sfx||AC.state!='running')return;const f=FX[k];if(f)f(AC.currentTime+dl+.01)}
+// ----- 배경음악: 재즈풍 로파이 루프 (Dm9-G13-Cmaj9-Fmaj7-Dm9-G13-Cmaj9-A7) -----
+const BR=[[38,[53,57,60,64],[69,72,74,76,77,79,81,84]],[43,[53,59,62,64],[71,72,74,76,77,79,81,83]],[36,[55,59,62,64],[72,74,76,79,81,83,84,86]],[41,[57,60,64,67],[69,72,74,76,77,79,81,84]],
+[38,[53,57,60,64],[69,72,74,76,77,79,81,84]],[43,[53,59,62,64],[71,72,74,76,77,79,81,83]],[36,[55,59,62,64],[72,74,76,79,81,83,84,86]],[45,[55,61,64],[69,73,74,76,79,81,85]]];
+let mi=3;
+function ep(m,t,d,vv){const f=mtof(m);tone(f,t,d,{v:vv,a:.004,out:bus});tone(f*2,t,d*.5,{v:vv*.35,a:.002,out:bus});tone(f*4.01,t,.12,{v:vv*.12,a:.001,out:bus})}
+const strum=(ch,t,d,vv)=>ch.forEach((m,i)=>ep(m,t+i*.012,d,vv));
+function stepAt(s,t){const[r,ch,sc]=BR[(s>>3)%8],st=s&7,T=t+((st&1)?SD*.14:0);
+if(st==0)strum(ch,T,2.2,.055);else if(st==3)strum(ch,T,.5,.035);else if(st==6&&Math.random()<.6)strum(ch,T,.6,.03);
+if(st==0)tone(mtof(r),T,.95,{type:'triangle',v:.3,a:.01,out:dr});else if(st==4)tone(mtof(r+7),T,.5,{type:'triangle',v:.2,a:.01,out:dr});else if(st==6&&Math.random()<.35)tone(mtof(r+12),T,.3,{type:'triangle',v:.12,a:.01,out:dr});
+if(st==0||st==5)tone(110,T,.18,{v:.35,f2:45,a:.002,out:dr});
+if(st==2||st==6){nz(T,.14,{f:1800,q:.5,v:.14,out:dr});tone(190,T,.08,{v:.08,f2:120,out:dr})}
+nz(T,.04,{type:'highpass',f:7500,v:(st&1)?.03:.05,out:dr});
+if([1,3,4,5,7].includes(st)&&Math.random()<.22){mi=Math.max(0,Math.min(sc.length-1,mi+(Math.random()*5|0)-2));const f=mtof(sc[mi]);tone(f,T,.9,{v:.05,out:bus});tone(f*3,T,.2,{v:.015,out:bus})}}
+function pump(){if(!AC)return;if(nextT<AC.currentTime)nextT=AC.currentTime+.05;while(nextT<AC.currentTime+.25){stepAt(bs++,nextT);nextT+=SD}}
+function bgm(){if(!AC)return;vol();if(ST.bgm&&!document.hidden&&AC.state=='running'){if(!bgT){nextT=AC.currentTime+.15;bgT=setInterval(pump,25)}}else if(bgT){clearInterval(bgT);bgT=0}}
+function unlock(){const a=ac();if(!a)return;if(a.state!='running'&&a.resume)a.resume().then(bgm).catch(()=>{});bgm();if(a.state=='running')['pointerdown','keydown','touchend'].forEach(e=>removeEventListener(e,unlock,true))}
+['pointerdown','keydown','touchend'].forEach(e=>addEventListener(e,unlock,true));
+document.addEventListener('visibilitychange',()=>{if(!AC)return;if(!document.hidden&&AC.state!='running')AC.resume().catch(()=>{});bgm()});
+// ----- 게임 이벤트별 효과음 -----
+function ev(L){const k=L=='폴드'?'fold':L=='ALL-IN'?'allin':L=='체크'?'check':L=='콜'?'call':'raise';S.players.forEach(q=>q.conn&&q.conn.open&&q.conn.send({t:'e',k}));sfx(k)}
+function turnSfx(v,p){const k=v.hand+'.'+v.turn+'.'+v.ph+'.'+v.cur;if(v.turn>=0&&v.players[v.turn]&&v.players[v.turn].id==v.me&&p&&p.in&&!p.folded&&!p.allin&&k!=lastTk)sfx('turn');lastTk=k}
+function lobSfx(v){if(v.wt&&v.wt!=lastFan){lastFan=v.wt;sfx(v.wid==me?'fan':'end')}if(lastN&&v.players.length>lastN)sfx('join');lastN=v.players.length}
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.closest('.gb'))openSet();if(!b.closest('#act')&&!b.closest('#sp')&&!b.closest('#dp'))sfx('click')});
+// ----- 설정 패널 -----
+let sOpen=0;
+function buildSet(){const nx=[...TT].reverse().find(t=>t[0]>myW),cur=ttl(myW),pr=nx?Math.min(100,(myW-cur[0])/(nx[0]-cur[0])*100):100,th=ST.theme;
+$('#sp').innerHTML=`<div class="sc" role="dialog" aria-modal="true" aria-label="설정"><header><b>설정</b><button id="sx" style="height:30px;padding:0 10px" aria-label="닫기">✕</button></header>
+${acctSec()}<section><h4>소리</h4>
+<div class="row"><span>배경음악</span><button class="sw" data-s="bgm" aria-pressed="${!!ST.bgm}" aria-label="배경음악 켜기/끄기"></button></div>
+<div class="row"><input type="range" min="0" max="100" step="5" value="${ST.bv}" data-v="bv" aria-label="배경음악 음량" ${ST.bgm?'':'disabled'}><em data-o="bv">${ST.bv}</em></div>
+<div class="row"><span>효과음</span><button class="sw" data-s="sfx" aria-pressed="${!!ST.sfx}" aria-label="효과음 켜기/끄기"></button></div>
+<div class="row"><input type="range" min="0" max="100" step="5" value="${ST.sv}" data-v="sv" aria-label="효과음 음량" ${ST.sfx?'':'disabled'}><em data-o="sv">${ST.sv}</em></div></section>
+<section><h4>화면 테마</h4><div class="seg">${[['dark','다크'],['light','라이트'],['auto','시스템']].map(([k,n])=>`<button data-th="${k}" class="${th==k?'on':''}">${n}</button>`).join('')}</div></section>
+<section><h4>내 전적</h4>
+<div class="row"><span style="font:800 28px Manrope">${myW}<span style="font-size:14px;color:var(--mu)"> 승</span></span><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">${DEV?tag(0,'lg',1):''}${tag(myW,'lg')}</span></div>
+<div class="pg"><i style="width:${pr}%"></i></div>
+<div class="small">${nx?`다음 칭호 <b>${nx[1]}</b>까지 ${nx[0]-myW}승 남았어요`:'최고 칭호를 달성했어요! 👑'}</div>
+<div class="small">한 판(게임)이 끝났을 때 마지막까지 살아남은 1명이 1승을 얻어요. 핸드 단위가 아니에요.<br>초보 0~4승 · 중수 5~29승<br>고수 30~99승 · 홀덤의 신 100승 이상<br>전적과 칭호는 내 계정에 저장되고, 줄어들지 않아요.</div>
+<details><summary>전적 백업 / 복원</summary>
+<div class="small" style="margin-top:6px">브라우저 데이터를 지우거나 기기를 바꿀 때 코드로 옮길 수 있어요.</div>
+<div class="row" style="margin-top:8px"><input readonly value="${enc(myW)}" aria-label="백업 코드"><button id="bcp">복사</button></div>
+<div class="row" style="margin-top:8px"><input id="rs" placeholder="백업 코드 붙여넣기" autocomplete="off"><button id="rb">복원</button></div></details></section>${devSec()}</div>`}
+function devSec(){return DEV?`<section><h4>개발자</h4><div class="row"><span>개발자 모드</span>${tag(0,'',1)}</div><div class="row"><button class="w" id="dop" style="flex:1">개발자 설정 열기</button><button id="dof">해제</button></div></section>`:`<section><details><summary>개발자 코드</summary><div class="row" style="margin-top:8px"><input id="dk" type="password" placeholder="개발자 코드 입력" autocomplete="off"><button id="dok">확인</button></div></details></section>`}
+function openSet(){if(sOpen)return;sOpen=1;buildSet();$('#sp').classList.add('on');setTimeout(()=>{const x=$('#sx');x&&x.focus()},50)}
+function closeSet(){sOpen=0;$('#sp').classList.remove('on')}
+$('#sp').addEventListener('click',e=>{if(e.target.id=='sp')return closeSet();const b=e.target.closest('button');if(!b)return;
+if(b.id=='sx')return closeSet();
+if(b.id=='lo'){cloudFlush();FB.logout().then(()=>location.reload());return}
+if(b.dataset.s){const k=b.dataset.s;ST[k]=ST[k]?0:1;saveST();ac();k=='bgm'?bgm():vol();buildSet();if(k=='sfx'&&ST.sfx)setTimeout(()=>sfx('chip'),30)}
+else if(b.dataset.th){ST.theme=b.dataset.th;saveST();applyTheme();buildSet()}
+else if(b.id=='bcp'){const v=$('#sp input[readonly]').value;(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>toast('백업 코드를 복사했어요'),()=>{$('#sp input[readonly]').select();toast('코드를 길게 눌러 복사하세요')})}
+else if(b.id=='rb'){const x=dec($('#rs').value);if(x<0)toast('올바르지 않은 코드예요');else if(x<=myW)toast('현재 전적이 같거나 더 높아요');else{setW(x);syncMyW();buildSet();toast('전적을 복원했어요: '+x+'승')}}
+else if(b.id=='dok')devLogin();else if(b.id=='dop')openDev();else if(b.id=='dof')devOff()});
+$('#sp').addEventListener('keydown',e=>{if(e.key=='Enter'&&e.target.id=='dk')devLogin()});
+$('#sp').addEventListener('input',e=>{const k=e.target.dataset.v;if(!k)return;ST[k]=+e.target.value;saveST();vol();const o=$('#sp [data-o="'+k+'"]');if(o)o.textContent=ST[k]});
+$('#sp').addEventListener('change',e=>{const k=e.target.dataset.v;if(k=='sv')sfx('chip')});
+addEventListener('keydown',e=>{if(e.key=='Escape'){if(dOpen)closeDev();else if(sOpen)closeSet()}});
+// ----- 개발자 모드 -----
+let dOpen=0,dTry=0,dLock=0,dbgT=0,dfr=0,dft=0,fps=0;
+const FXK=['click','deal','call','raise','allin','check','fold','turn','win','pot','chip','chat','join','title','fan','end'];
+const DNM={click:'클릭',deal:'딜',call:'콜',raise:'레이즈',allin:'올인',check:'체크',fold:'폴드',turn:'내 차례',win:'승리',pot:'팟',chip:'칩',chat:'채팅',join:'입장',title:'칭호',fan:'우승',end:'종료'};
+function devLogin(){const i=$('#dk');if(!i)return;const now=Date.now();if(now<dLock)return toast('잠시 후 다시 시도하세요');
+if(dh(i.value.trim())===DK){dTry=0;DEV=1;try{localStorage.hdv=DK}catch(e){}syncMyW();buildSet();toast('🛠 개발자 모드가 활성화됐어요');ac();sfx('title');dbgStart()}
+else{i.value='';if(++dTry>=5){dTry=0;dLock=now+30000;toast('5회 실패! 30초 뒤에 다시 시도하세요')}else toast('코드가 올바르지 않아요')}}
+function devOff(){DEV=0;try{localStorage.removeItem('hdv')}catch(e){}closeDev();syncMyW();buildSet();toast('개발자 모드를 해제했어요')}
+function openDev(){if(!DEV)return;closeSet();dOpen=1;buildDev();$('#dp').classList.add('on');setTimeout(()=>{const x=$('#dx');x&&x.focus()},50)}
+function closeDev(){dOpen=0;$('#dp').classList.remove('on')}
+function buildDev(){const H=isHost&&S,lob=H&&S.phase=='lobby',bs=ST.bs||1;
+$('#dp').innerHTML=`<div class="sc" role="dialog" aria-modal="true" aria-label="개발자 설정"><header><b>개발자 설정 ${tag(0,'',1)}</b><button id="dx" style="height:30px;padding:0 10px" aria-label="닫기">✕</button></header>
+<section><h4>전적 / 칭호</h4>
+<div class="row"><input id="dw" type="text" inputmode="numeric" placeholder="승수 직접 입력" value="${myW}" autocomplete="off"><button id="dwa">적용</button></div>
+<div class="dg">${TT.slice().reverse().map(t=>`<button data-w="${t[0]}">${t[1]}</button>`).join('')}</div>
+<div class="small">칭호 미리보기용이에요. 일반 전적과 같은 값이라 바로 저장돼요. (현재 ${myW}승)</div></section>
+<section><h4>디버그</h4>
+<div class="row"><span>디버그 오버레이</span><button class="sw" data-ds="dbg" aria-pressed="${!!ST.dbg}" aria-label="디버그 오버레이 켜기/끄기"></button></div>
+<div class="small">봇 생각 속도 (내가 호스트일 때 적용)</div>
+<div class="dg">${[[.1,'매우 빠름'],[.5,'빠름'],[1,'보통'],[2,'느림']].map(([x,n])=>`<button data-bs="${x}" class="${bs==x?'on':''}">${n}</button>`).join('')}</div>
+<button id="dcp">내 화면 상태(JSON) 복사</button></section>
+<section><h4>효과음 · 이펙트 테스트</h4>
+<div class="dg">${FXK.map(k=>`<button data-fx="${k}">${DNM[k]}</button>`).join('')}</div>
+<div class="dg c3"><button data-ef="boom">폭죽</button><button data-ef="toast">토스트</button><button data-ef="fan">우승 연출</button></div></section>
+<section><h4>호스트 도구</h4>${H?`<div class="small">모든 플레이어에게 반영돼요. 봇 제거·코인 리셋은 로비에서만 쓸 수 있어요.</div>
+<div class="dg c3"><button data-ht="bot3">봇 +3</button><button data-ht="botx" ${lob?'':'disabled'}>봇 제거</button><button data-ht="chips" ${lob?'':'disabled'}>코인 리셋</button></div>
+<div class="dg c3"><button data-ht="next" ${S.phase=='show'?'':'disabled'}>다음 핸드</button><button data-ht="end" ${lob?'disabled':''}>로비로 종료</button></div>`:`<div class="small">방을 만든 호스트일 때만 사용할 수 있어요.</div>`}</section></div>`}
+function devW(x){setW(x);syncMyW();buildDev();toast('전적을 '+x+'승으로 설정했어요')}
+function devEnd(){clearTimeout(tm);S.tn++;S.phase='lobby';S.res=null;S.board=[];S.turn=-1;S.dl=0;S.winner=null;S.wid=S.wt=null;
+S.players.forEach(p=>{p.chips=START;p.in=false;p.cards=[];p.bet=0;p.total=0;p.folded=false;p.allin=false;p.last=''});sync()}
+function hostTool(k){if(!isHost||!S)return;
+if(k=='bot3'){for(let i=0;i<3;i++)addBot()}
+else if(k=='botx'&&S.phase=='lobby'){S.players=S.players.filter(p=>!p.bot);sync()}
+else if(k=='chips'&&S.phase=='lobby'){S.players.forEach(p=>p.chips=START);sync()}
+else if(k=='next'&&S.phase=='show')startHand();
+else if(k=='end'&&S.phase!='lobby'&&confirm('게임을 강제로 종료하고 모두 로비로 돌려보낼까요? (승수는 오르지 않아요)'))devEnd();
+buildDev()}
+$('#dp').addEventListener('click',e=>{if(e.target.id=='dp')return closeDev();const b=e.target.closest('button');if(!b||!DEV)return;
+if(b.id=='dx')return closeDev();
+const d=b.dataset;
+if(b.id=='dwa'){const x=parseInt($('#dw').value.replace(/\D/g,''),10);if(isNaN(x)||x<0||x>=1e6)toast('0~999999 사이로 입력하세요');else devW(x)}
+else if(d.w!=null)devW(+d.w);
+else if(d.ds){ST.dbg=ST.dbg?0:1;saveST();dbgStart();buildDev()}
+else if(d.bs){ST.bs=+d.bs;saveST();buildDev();toast('봇 속도를 바꿨어요')}
+else if(b.id=='dcp'){const v=JSON.stringify(V||{},null,1);(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>toast('상태를 복사했어요'),()=>toast('복사할 수 없어요'))}
+else if(d.fx){ac();if(!ST.sfx)toast('효과음이 꺼져 있어요');else sfx(d.fx)}
+else if(d.ef=='boom')boom();
+else if(d.ef=='toast')toast('🛠 토스트 테스트');
+else if(d.ef=='fan'){toast('🏆 우승! 테스트');sfx('fan');boom()}
+else if(d.ht)hostTool(d.ht)});
+$('#dp').addEventListener('keydown',e=>{if(e.key=='Enter'&&e.target.id=='dw')$('#dwa').click()});
+function dbgDraw(){const e=$('#dbg');if(!e)return;const v=V||{},c=isHost?(S?S.players.filter(p=>p.conn&&p.conn.open).length+'명 연결':'-'):(conn&&conn.open?'연결됨':'끊김');
+e.textContent=`FPS ${fps}  ${isHost?'HOST':'CLIENT'}  ${peer&&peer.id||'-'}\n${c}  플레이어 ${(v.players||[]).length}\nph ${v.ph||'-'}  hand ${v.hand||0}  turn ${v.turn}  me ${M}\ncur ${v.cur}  min ${v.min}  pot ${v.pot}  tl ${Math.round((v.tl||0)/1000)}s`}
+function dbgLoop(t){if(!(DEV&&ST.dbg)){dbgT=0;$('#dbg').style.display='none';return}dfr++;if(t-dft>=500){fps=Math.round(dfr*1000/(t-dft));dfr=0;dft=t;dbgDraw()}requestAnimationFrame(dbgLoop)}
+function dbgStart(){if(DEV&&ST.dbg&&!dbgT){dbgT=1;dfr=0;dft=performance.now();$('#dbg').style.display='block';dbgDraw();requestAnimationFrame(dbgLoop)}}
+dbgStart();
+// ---------- 시작 화면 ----------
+$('#lg').innerHTML=[..."HOLD'EM"].map((c,i)=>`<span style="--i:${i}">${c}</span>`).join('');
+for(let i=0;i<16;i++){const e=document.createElement('div');e.className='fl';e.textContent=SU[i%4];e.style.cssText=`left:${Math.random()*96}%;font-size:${30+Math.random()*60}px;animation-duration:${9+Math.random()*10}s;animation-delay:-${Math.random()*15}s`;$('#st').appendChild(e)}
+$('#nm').value=name;if(/^#\w{4}$/.test(location.hash))$('#cd').value=location.hash.slice(1);
+const getName=()=>{name=$('#nm').value.trim()||'Player'+(Math.random()*90+10|0);try{localStorage.cn=name}catch(e){}cloudSave({nickname:name})};
+$('#mk').onclick=()=>{getName();hostRoom()};
+$('#jn').onclick=()=>{getName();const c=$('#cd').value.trim().toUpperCase();c.length==4?joinRoom(c):toast('방 코드 4자리를 입력하세요')};
+// ---------- 네트워크 (PeerJS: 서버 없이 P2P, GitHub Pages에서 동작) ----------
+function hostRoom(){if(!USER)return;isHost=true;code=[...Array(4)].map(()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.random()*32|0]).join('');
+peer=new Peer(PFX+code);
+peer.on('open',()=>{S={code,players:[],phase:'lobby',hand:0,dealer:-1,board:[],tn:0,res:null,chat:[]};const h=addP(me,name);h.w=myW;h.dev=DEV;sync()});
+peer.on('connection',c=>{c.on('data',m=>onMsg(c,m));c.on('close',()=>drop(c))});
+peer.on('disconnected',()=>peer.reconnect());
+peer.on('error',e=>{if(e.type=='unavailable-id')hostRoom();else toast('연결 오류: '+e.type)})}
+function joinRoom(c){if(!USER)return;peer=new Peer();let ok=0;
+peer.on('open',()=>{conn=peer.connect(PFX+c,{reliable:true});
+conn.on('open',()=>{ok=1;conn.send({t:'join',pid:me,name,w:myW,d:DEV})});
+conn.on('data',m=>{if(m.t=='s')render(m.v);if(m.t=='e')sfx(m.k);if(m.t=='c')onChat(m.x);if(m.t=='ch'){chat=m.l;drawChat()}if(m.t=='err'){toast(m.m);setTimeout(()=>location.reload(),1500)}});
+conn.on('close',()=>{toast('호스트와 연결이 끊어졌습니다');setTimeout(()=>location.reload(),2000)});
+setTimeout(()=>{if(!ok){toast('방을 찾을 수 없어요');peer.destroy()}},9000)});
+peer.on('error',e=>toast(e.type=='peer-unavailable'?'방을 찾을 수 없어요':'연결 오류: '+e.type))}
+function onMsg(c,m){if(m.t=='join'){let p=S.players.find(p=>p.id==m.pid);
+if(!p){if(S.players.length>=MAX)return c.send({t:'err',m:'방이 가득 찼어요 (최대 12명)'});p=addP(m.pid,String(m.name).slice(0,10))}
+p.conn=c;p.away=false;p.w=cw(m.w);p.dev=!!m.d;c.pid=m.pid;sync();c.send({t:'ch',l:S.chat})}
+else if(m.t=='chat'){const p=S.players.find(p=>p.id==c.pid),t=String(m.m).trim().slice(0,120);if(p&&t)say(p,t)}
+else if(m.t=='w'){const p=S.players.find(p=>p.id==c.pid);if(p){p.w=cw(m.w);p.dev=!!m.d;sync()}}
+else if(m.t=='act'){const p=S.players.find(p=>p.id==c.pid);if(p)doAct(p,m.a,m.n)}}
+function drop(c){const p=S.players.find(p=>p.conn==c);if(!p)return;if(S.phase=='lobby')S.players=S.players.filter(q=>q!=p);else{p.away=true;p.conn=null}sync()}
+function addP(id,nm,bot){const p={id,name:nm,chips:START,cards:[],bet:0,total:0,folded:false,allin:false,acted:false,in:false,last:'',bot,conn:null,away:false};S.players.push(p);return p}
+const send=(a,n)=>isHost?doAct(S.players[0],a,n):conn.send({t:'act',a,n});
+function view(id){const rev=S.phase=='show'&&S.res&&S.res.rev;
+return{code:S.code,hand:S.hand,ph:S.phase,board:S.board,dealer:S.dealer,turn:S.turn,cur:S.cur,min:S.min,me:id,host:S.players[0].id,res:S.res,winner:S.winner,wid:S.wid,wt:S.wt,cfg:{ante:ANTE,tl:TL/1000,start:START,minr:MINR},
+pot:S.players.reduce((a,p)=>a+p.total,0),tl:S.turn>=0&&S.dl?Math.max(0,S.dl-Date.now()):0,
+players:S.players.map(p=>({id:p.id,name:p.name,chips:p.chips,bet:p.bet,folded:p.folded,allin:p.allin,bot:p.bot,in:p.in,away:p.away,last:p.last,nr:p.nr,w:p.w,dev:p.dev,
+cards:p.in?(p.id==id||(rev&&!p.folded)?p.cards:[-1,-1]):[]}))}}
+function sync(){S.players.forEach(p=>p.conn&&p.conn.open&&p.conn.send({t:'s',v:view(p.id)}));render(view(me))}
+// ---------- 게임 로직 (호스트 전용) ----------
+const BN=['Ace','King','Queen','Jack','Joker','Lucky','Shark','Bluff','Rook','Vegas','Dealer'];
+function addBot(){if(S.players.length>=MAX)return toast('최대 12명이에요');const u=BN.filter(n=>!S.players.some(p=>p.name==n));addP('bot'+Math.random().toString(36).slice(2,6),u[0]||'Bot',1);sync()}
+function startHand(){clearTimeout(tm);const alive=S.players.filter(p=>p.chips>0).length;S.players=S.players.filter(p=>p.bot?p.chips>0:!p.away);
+const P=S.players,n=P.length,el=P.filter(p=>p.chips>0);
+if(el.length<2){S.winner=el[0]&&el[0].name;S.wt=el[0]?Math.random().toString(36).slice(2,10):null;S.wid=el[0]&&!el[0].bot&&alive==1?el[0].id:null;P.forEach(p=>{p.chips=START;p.in=false});S.phase='lobby';S.res=null;S.board=[];return sync()}
+S.winner=null;S.wid=S.wt=null;S.hand++;S.res=null;S.board=[];S.phase='pre';S.dl=0;
+const d=[...Array(52).keys()];for(let i=51;i>0;i--){const j=Math.random()*(i+1)|0;[d[i],d[j]]=[d[j],d[i]]}S.deck=d;
+P.forEach(p=>{const e=p.chips>0;Object.assign(p,{cards:e?[d.pop(),d.pop()]:[],bet:0,total:0,folded:false,allin:false,acted:false,nr:false,in:e,last:''});
+if(e){const a=Math.min(ANTE,p.chips);p.chips-=a;p.total+=a;if(!p.chips)p.allin=true}});
+let i=S.dealer;do{i=(i+1)%n}while(!P[i].in);S.dealer=i;S.cur=0;S.min=MINR;S.turn=i;adv()}
+const put=(p,x)=>{x=Math.min(x,p.chips);p.chips-=x;p.bet+=x;p.total+=x;if(!p.chips)p.allin=true};
+function act(p,a,n){S.tn++;clearTimeout(tm);const to=S.cur-p.bet;if(a=='raise'&&p.nr)a='call';
+if(a=='fold'){p.folded=true;p.last='폴드'}
+else{const t=a=='raise'?Math.min(Math.max(n|0,S.cur+S.min),p.bet+p.chips):S.cur;
+if(t<=S.cur){put(p,Math.min(to,p.chips));p.last=to>0?'콜':'체크'}
+else{const was=S.cur;put(p,t-p.bet);const inc=p.bet-was;
+if(inc>=S.min){S.min=inc;S.players.forEach(q=>{if(q!=p){q.acted=false;q.nr=false}})}else S.players.forEach(q=>{if(q!=p&&q.acted)q.nr=true});
+S.cur=Math.max(S.cur,p.bet);p.last=(was?'레이즈 ':'베팅 ')+p.bet}}
+if(p.allin)p.last='ALL-IN';p.acted=true;ev(p.last)}
+function doAct(p,a,n){if(S.phase=='lobby'||S.phase=='show'||S.players[S.turn]!=p)return;act(p,a,n);adv()}
+function adv(){const P=S.players,n=P.length;if(P.filter(p=>p.in&&!p.folded).length==1)return showdown();
+for(let k=1;k<=n;k++){const i=(S.turn+k)%n,p=P[i];if(p.in&&!p.folded&&!p.allin&&(!p.acted||p.bet<S.cur)){S.turn=i;return turnStart()}}street()}
+function street(){const P=S.players;if(S.board.length==5)return showdown();
+P.forEach(p=>{p.bet=0;p.acted=false;p.nr=false;if(!p.folded&&!p.allin)p.last=''});S.cur=0;S.min=MINR;
+S.deck.pop();for(let i=S.board.length?1:3;i--;)S.board.push(S.deck.pop());
+S.phase=['pre','pre','pre','flop','turn','river'][S.board.length];
+const can=P.filter(p=>p.in&&!p.folded&&!p.allin);
+if(can.length<2){S.turn=-1;S.dl=0;sync();const h=S.hand;return void(tm=setTimeout(()=>{if(S.hand==h)street()},1500))}
+S.turn=S.dealer;adv()}
+function turnStart(){clearTimeout(tm);const p=S.players[S.turn],h=S.hand,tn=++S.tn;
+const d=p.bot?(900+Math.random()*1000)*(DEV?ST.bs||1:1):p.away?500:TL;S.dl=p.bot||p.away||!TL?0:Date.now()+TL;sync();if(!d)return;
+tm=setTimeout(()=>{if(S.hand!=h||S.tn!=tn||S.players[S.turn]!=p)return;if(p.bot)bot(p);else{act(p,S.cur>p.bet?'fold':'call');adv()}},d)}
+function bot(p){const to=S.cur-p.bet;let s;
+if(!S.board.length){const a=p.cards[0]%13,b=p.cards[1]%13;s=Math.max(a,b)/20+(a==b?.5:0)+((p.cards[0]/13|0)==(p.cards[1]/13|0)?.08:0)}
+else s=(best([...p.cards,...S.board])/759375|0)/6+.25;
+s+=Math.random()*.25-.1;let a='call',n=0;
+if(!to){if(s>.65&&Math.random()<.6){a='raise';n=S.cur+Math.max(S.min,20)*(1+(Math.random()*3|0))}}
+else if(s<.4&&to>Math.max(ANTE,MINR))a='fold';
+else if(s>.85&&Math.random()<.4){a='raise';n=S.cur+Math.max(S.min,20)*2}
+act(p,a,n);adv()}
+function showdown(){clearTimeout(tm);S.turn=-1;S.dl=0;S.phase='show';const live=S.players.filter(p=>p.in&&!p.folded),rev=live.length>1,sc={},wins={},hn={};
+if(rev)live.forEach(p=>sc[p.id]=best([...p.cards,...S.board]));
+const lv=[...new Set(live.map(p=>p.total))].sort((a,b)=>a-b);let prev=0;
+lv.forEach((L,i)=>{const top=i==lv.length-1?1e9:L;let amt=0;S.players.forEach(p=>amt+=Math.max(0,Math.min(p.total,top)-prev));prev=L;
+const el=live.filter(p=>p.total>=L);let w=el;if(rev){const m=Math.max(...el.map(p=>sc[p.id]));w=el.filter(p=>sc[p.id]==m)}
+const sh=Math.floor(amt/w.length);w.forEach((p,k)=>{const g=sh+(k?0:amt-sh*w.length);p.chips+=g;wins[p.id]=(wins[p.id]||0)+g})});
+if(rev)live.forEach(p=>hn[p.id]=hname(sc[p.id]));
+S.res={wins,hn,rev};sync();
+const h=S.hand;tm=setTimeout(()=>{if(S.hand==h)startHand()},7000)}
+// ---------- 렌더링 ----------
+function render(v){V=v;if(v.cfg){ANTE=v.cfg.ante;TL=v.cfg.tl*1000;START=v.cfg.start;MINR=v.cfg.minr}winCheck(v);if(v.ph=='lobby')lobby(v);else game(v)}
+const CF=[['ante','판비',[0,10,20,30,50,100]],['tl','턴 시간',[15,30,60,0]],['start','시작 코인',[500,1000,2000,5000,10000]],['minr','최소 레이즈',[10,20,50,100]]],fmt=(k,x)=>k=='tl'?(x?x+'초':'무제한'):x;
+function lobby(v){go('lb');ak='';lobSfx(v);const H=v.me==v.host;
+$('#lb').innerHTML=`<div class="logo" style="font-size:56px">HOLD'EM</div>${v.winner?`<div class="ban">♛ 우승 ${esc(v.winner)}</div>`:''}<div style="color:var(--mu)">방 코드</div><div style="font:800 44px Manrope;letter-spacing:.2em;margin-right:-.2em">${v.code}</div>
+<div style="display:flex;gap:8px"><button id="cp">초대 링크 복사</button><button class="cb" style="height:46px;padding:0 16px">${cbi()}</button><button class="gb" aria-label="설정">${GEAR}</button></div><div class="pl">${v.players.map((p,i)=>`<div class="av" ${H&&p.bot?`data-r="${p.id}" style="cursor:pointer;animation-delay:${i*.05}s"`:`style="animation-delay:${i*.05}s"`}><b>${esc(p.name[0])}</b><div>${esc(p.name)}</div>${p.bot?'':`<div style="overflow:visible;margin:3px 0">${tag(p.w,'',p.dev)}</div>`}<div style="color:var(--mu);font-size:11px">${p.id==v.host?'방장':p.bot?'봇 (탭하여 제거)':'참가'}</div></div>`).join('')}</div>
+<div style="color:var(--mu)">${v.players.length} / ${MAX}</div>
+<div class="cfg">${CF.map(([k,n,o])=>`<label>${n}${H?`<select data-k="${k}">${o.map(x=>`<option value="${x}"${v.cfg[k]==x?' selected':''}>${fmt(k,x)}</option>`).join('')}</select>`:`<b>${fmt(k,v.cfg[k])}</b>`}</label>`).join('')}</div>
+${H?`<div style="display:flex;gap:8px"><button id="ab">봇 추가</button><button class="w" id="sb">게임 시작</button></div>`:`<div class="sub">방장이 시작하기를 기다리는 중…</div>`}`;
+document.querySelectorAll('.cb').forEach(b=>b.onclick=openChat);$('#cp').onclick=()=>{navigator.clipboard.writeText(location.href.split('#')[0]+'#'+v.code).then(()=>toast('초대 링크를 복사했어요'))};
+if(H){document.querySelectorAll('[data-k]').forEach(e=>e.onchange=()=>{const x=+e.value,k=e.dataset.k;if(k=='ante')ANTE=x;if(k=='tl')TL=x*1000;if(k=='minr')MINR=x;if(k=='start'){START=x;S.players.forEach(p=>p.chips=x)}sync()});$('#ab').onclick=addBot;$('#sb').onclick=()=>S.players.length<2?toast('2명 이상 필요해요 (봇 추가 가능)'):startHand();
+document.querySelectorAll('[data-r]').forEach(e=>e.onclick=()=>{S.players=S.players.filter(p=>p.id!=e.dataset.r);sync()})}}
+const pos=(k,n)=>{const a=(90+k*360/n)*Math.PI/180;return[50+40*Math.cos(a),50+38*Math.sin(a)]};
+const face=c=>c<0?'':`<div class="fr${[1,2].includes(c/13|0)?' r':''}">${rk(c)}<i>${SU[c/13|0]}</i></div>`;
+function game(v){go('gm');lastN=0;const n=v.players.length;M=Math.max(0,v.players.findIndex(p=>p.id==v.me));
+if(v.hand!=curHand){curHand=v.hand;seen=new Set();pb={};ak='';prevPot=0}
+const tb=$('#tbl'),W=tb.clientWidth||360,HH=tb.clientHeight||400;let q=0;
+const cd=(c,slot,fx,fy)=>{const k=slot+'|'+c,nw=!seen.has(k);seen.add(k);const d=nw?q++*.12:0;if(nw&&q<13)sfx('deal',d);
+return`<div class="card${c<0?' dn':''}${nw?' a':''}" style="--fx:${fx}px;--fy:${fy}px;--d:${d}s"><div class="in">${face(c)}<div class="bk"></div></div></div>`};
+const r=v.res;let bets='';
+const seats=v.players.map((p,i)=>{const[x,y]=pos((i-M+n)%n,n),w=r&&r.wins[p.id],
+cls=['seat',v.turn==i&&'t',(p.folded||!p.in)&&'f',w&&'w'].filter(Boolean).join(' ');
+if(p.bet)bets+=`<div class="bt" data-b="${p.id}" style="left:${50+(x-50)*.58}%;top:${50+(y-50)*.58}%">● ${p.bet}</div>`;
+const cs=p.id==v.me?'':p.cards.map((c,j)=>cd(c,'p'+p.id+j,(50-x)/100*W,(50-y)/100*HH)).join('');
+const sub=w?'+'+w+(r.hn[p.id]?' '+r.hn[p.id]:''):(r&&r.hn[p.id])||p.last||(p.chips<=0&&!p.in?'관전':p.away?'자리비움':'');
+return`<div class="${cls}" data-id="${p.id}" style="left:${x}%;top:${y}%">${i==v.dealer?'<u class="db">D</u>':''}<div class="cs">${cs}</div><div class="pn">${p.bot?'':`<div class="tw">${tag(p.w,'',p.dev)}</div>`}<div class="nm">${p.bot?'🂠 ':''}${esc(p.name)}</div><div class="ch">${p.chips}</div><div class="lb2">${esc(sub)}</div>${v.turn==i&&v.tl?`<div class="tb"><i data-t="${v.tl}" style="width:${v.tl/TL*100}%"></i></div>`:''}</div></div>`}).join('');
+let ban='';if(r){const ws=Object.keys(r.wins).map(id=>v.players.find(p=>p.id==id));ban=`<div class="ban">♛ ${ws.map(p=>esc(p.name)).join(', ')} +${r.wins[ws[0].id]}${r.rev?`<small>${r.hn[ws[0].id]}</small>`:''}</div>`}
+tb.innerHTML=`<div id="felt"></div><div id="ctr"><div class="brd">${v.board.map((c,j)=>cd(c,'b'+j,0,-130)).join('')}</div><div id="pot">0</div>${ban}</div>${bets}${seats}`;
+const mp=v.players[M];turnSfx(v,mp);$('#mine').innerHTML=mp&&mp.in?mp.cards.map((c,j)=>cd(c,'m'+j,0,-200)).join(''):'';
+$('#hn').textContent=mp&&mp.in&&!mp.folded&&v.board.length>=3?hname(best([...mp.cards,...v.board])):'';
+$('#top').innerHTML=`<span>방 <b>${v.code}</b></span><span>핸드 ${v.hand}  판비 ${ANTE||'없음'}</span><span style="display:flex;gap:6px"><button class="gb" aria-label="설정">${GEAR}</button><button class="cb">${cbi()}</button><button id="lv" style="height:30px;padding:0 12px;font-size:12px">나가기</button></span>`;
+$('#lv').onclick=()=>{peer&&peer.destroy();location.reload()};document.querySelectorAll('.cb').forEach(b=>b.onclick=openChat);
+// 팟 카운트업
+const pe=$('#pot'),from=prevPot,t0=performance.now();prevPot=v.pot;
+(function f(t){const k=Math.min(1,(t-t0)/450);pe.textContent=Math.round(from+(v.pot-from)*k);if(k<1)requestAnimationFrame(f)})(t0);
+document.querySelectorAll('.tb i[data-t]').forEach(e=>{e.getBoundingClientRect();e.style.transition=`width ${e.dataset.t}ms linear`;e.style.width='0'});
+// 칩 이동 효과
+const el=id=>document.querySelector(`[data-id="${id}"]`);
+v.players.forEach(p=>{const o=pb[p.id]||0;if(p.bet>o)fly(el(p.id),document.querySelector(`[data-b="${p.id}"]`),Math.min(6,1+((p.bet-o)/20|0)));
+else if(!p.bet&&o&&!r)fly(el(p.id),$('#pot'),4);pb[p.id]=p.bet});
+if(r&&lastW!=v.hand){lastW=v.hand;sfx(r.wins[v.me]?'win':'pot');Object.keys(r.wins).forEach(id=>fly($('#pot'),el(id),10));boom()}
+actions(v,mp)}
+function actions(v,p){const spec=p&&p.chips<=0&&(!p.in||v.ph=='show');
+const key=[v.hand,v.turn,v.cur,v.min,p&&p.chips,p&&p.folded,p&&p.nr,v.ph,spec].join('.');if(key==ak)return;ak=key;const A=$('#act');
+if(spec){A.innerHTML=`<div class="sub">코인을 모두 잃어 관전 중이에요</div>`;return}
+if(!p||!p.in){A.innerHTML=`<div class="sub">다음 핸드부터 참여해요</div>`;return}
+if(p.folded||v.turn!=M||p.allin){A.innerHTML=`<div class="sub">${p.folded?'폴드했어요':p.allin?'올인!':v.turn>=0?esc(v.players[v.turn].name)+' 차례':''}</div>`;return}
+const to=v.cur-p.bet,mx=p.bet+p.chips,cr=p.chips>to&&!p.nr,lk=v.cur?'레이즈':'베팅';
+A.innerHTML=`<div class="r"><button id="bf">폴드<span class="kh">F</span></button><button id="bc" class="w">${to?'콜 '+Math.min(to,p.chips):'체크'}<span class="kh">Space</span></button></div>${cr?`<div class="r">${[10,50,100].map(x=>`<button class="q" data-x="${x}"${x<v.min||to+x>p.chips?' disabled':''}>+${x}</button>`).join('')}<button class="q" data-x="0">올인</button></div><div class="r"><input id="ri" type="text" inputmode="numeric" autocomplete="off" placeholder="직접 입력 (최소 ${v.min})"><button id="br" class="w">${lk}</button></div>`:''}`;
+const lock=()=>{A.querySelectorAll('button').forEach(b=>b.disabled=true);ak='';setTimeout(()=>V&&render(V),1500)};
+$('#bf').onclick=()=>{lock();send('fold')};$('#bc').onclick=()=>{lock();send('call')};
+if(cr){A.querySelectorAll('.q').forEach(b=>b.onclick=()=>{const x=+b.dataset.x;lock();send('raise',x?v.cur+x:mx)});
+const ri=$('#ri'),go2=()=>{const x=parseInt(ri.value.replace(/\D/g,''),10)||0;if(!x||x<v.min&&v.cur+x<mx)return toast('최소 '+v.min+' 이상 입력하세요');lock();send('raise',Math.min(v.cur+x,mx))};
+$('#br').onmousedown=e=>e.preventDefault();$('#br').onclick=go2;ri.onkeydown=e=>{if(e.key=='Enter')go2()}}}
+function fly(a,b,n){if(!a||!b)return;const A=a.getBoundingClientRect(),B=b.getBoundingClientRect();
+for(let i=0;i<n;i++){const e=document.createElement('div');e.className='fc';document.body.appendChild(e);
+const x1=A.left+A.width/2-6,y1=A.top+A.height/2-6,x2=B.left+B.width/2-6+(Math.random()*16-8),y2=B.top+B.height/2-6+(Math.random()*16-8);
+e.animate([{transform:`translate(${x1}px,${y1}px) scale(.4)`,opacity:0},{opacity:1,offset:.2},{transform:`translate(${x2}px,${y2}px) scale(1)`,opacity:1}],{duration:650,delay:i*70,easing:'cubic-bezier(.3,.7,.3,1)',fill:'both'}).onfinish=()=>e.remove()}}
+function boom(){const c=$('#cv'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+const P=Array.from({length:150},()=>({x:innerWidth/2,y:innerHeight*.45,vx:(Math.random()-.5)*18,vy:-Math.random()*15-3,r:Math.random()*5+3,a:Math.random()*6,c:['#fff','#ef3b54','#ffd76a','#aaa'][Math.random()*4|0]}));
+let f=0;(function L(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.vy+=.35;p.x+=p.vx;p.y+=p.vy;p.a+=.2;x.globalAlpha=Math.max(0,1-f/150);x.fillStyle=p.c;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillRect(-p.r,-p.r/2,p.r*2,p.r);x.restore()});if(++f<150)requestAnimationFrame(L);else x.clearRect(0,0,c.width,c.height)})()}
+document.addEventListener('keydown',e=>{if(cOpen||sOpen||dOpen||e.repeat||e.ctrlKey||e.metaKey||e.altKey||/INPUT|TEXTAREA/.test(e.target.tagName)||!$('#gm').classList.contains('on'))return;
+const b=e.code=='Space'?$('#bc'):e.code=='KeyF'?$('#bf'):null;if(!b)return;e.preventDefault();
+if(document.activeElement&&document.activeElement.tagName=='BUTTON')document.activeElement.blur();if(!b.disabled)b.click()});
+document.addEventListener('keyup',e=>{if(e.code=='Space'&&!/INPUT|TEXTAREA/.test(e.target.tagName))e.preventDefault()});
+let chat=[],unread=0,cOpen=0;
+const cbi=()=>'💬'+(unread?`<i class="ub">${unread>9?'9+':unread}</i>`:'');
+$('#cq').innerHTML=['👍','😂','🔥','😭','GG'].map(e=>`<button>${e}</button>`).join('');
+$('#cq').onclick=e=>{if(e.target.tagName=='BUTTON')sendChat(e.target.textContent)};
+function sendChat(t){t=String(t).trim().slice(0,120);if(!t)return;isHost?say(S.players[0],t):conn&&conn.send({t:'chat',m:t})}
+function say(p,t){if(Date.now()-(p.lc||0)<500)return;p.lc=Date.now();const x={id:p.id,n:p.name,m:t};S.chat=[...S.chat,x].slice(-40);S.players.forEach(q=>q.conn&&q.conn.open&&q.conn.send({t:'c',x}));onChat(x)}
+function onChat(x){chat=[...chat,x].slice(-60);drawChat();if(!cOpen&&x.id!=me){unread++;badge()}if(x.id!=me)sfx('chat');bubble(x)}
+function drawChat(){const l=$('#cl');l.innerHTML=chat.map(x=>`<div class="m${x.id==me?' me':''}"><b>${esc(x.n)}</b>${esc(x.m)}</div>`).join('');l.scrollTop=l.scrollHeight}
+function badge(){document.querySelectorAll('.cb').forEach(b=>b.innerHTML=cbi())}
+function openChat(){cOpen=1;unread=0;badge();$('#cp2').classList.add('on');drawChat();setTimeout(()=>$('#ci').focus(),300)}
+$('#cx').onclick=()=>{cOpen=0;$('#cp2').classList.remove('on')};
+const doSend=()=>{const i=$('#ci');sendChat(i.value);i.value=''};
+$('#cs').onclick=doSend;$('#ci').onkeydown=e=>{if(e.key=='Enter')doSend()};
+function bubble(x){const e=document.querySelector(`[data-id="${x.id}"]`);if(!e)return;const r=e.getBoundingClientRect(),b=document.createElement('div');b.className='bub';b.textContent=x.m;b.style.left=r.left+r.width/2+'px';b.style.top=r.top+'px';document.body.appendChild(b);setTimeout(()=>b.remove(),4000)}
+// ---------- Firebase 계정 ----------
+let USER=null,PROF=null,cq={},ct=0;
+function cloudSave(p){if(!USER||!window.FB)return;Object.assign(cq,p);clearTimeout(ct);ct=setTimeout(cloudFlush,700)}
+function cloudFlush(){clearTimeout(ct);if(!USER||!window.FB||!Object.keys(cq).length)return;const d=cq;cq={};FB.save(USER.uid,d).catch(()=>{Object.assign(cq,d);toast('저장에 실패했어요. 연결을 확인하세요')})}
+addEventListener('pagehide',cloudFlush);document.addEventListener('visibilitychange',()=>document.hidden&&cloudFlush());
+function authIn(u,p){USER=u;PROF=p;
+ST={...DEF,...(p.settings||{})};try{localStorage.hs=JSON.stringify(ST)}catch(e){}applyTheme();vol();bgm();
+myW=cw(p.wins);recUI();name=String(p.nickname||u.displayName||'').slice(0,10);$('#nm').value=name;
+$('#gerr').textContent='';$('#gate').classList.add('off')}
+function authOut(){USER=null;PROF=null;closeSet();$('#gate').classList.remove('off');$('#gbtn').disabled=false}
+function authFail(e){authOut();$('#gerr').textContent='데이터를 불러오지 못했어요 ('+(e.code||e.message)+'). Firestore 설정과 규칙을 확인하세요.';FB.logout()}
+const fd=t=>{try{return t?new Date(t).toLocaleString('ko-KR',{dateStyle:'medium',timeStyle:'short'}):'-'}catch(e){return'-'}};
+function acctSec(){if(!USER)return'';const u=USER,nm=u.displayName||'Player',m=u.metadata||{};
+return `<section><h4>내 계정</h4><div class="acc">${u.photoURL?`<img src="${esc(u.photoURL)}" alt="" referrerpolicy="no-referrer">`:`<div class="ph">${esc(nm[0])}</div>`}<div><b>${esc(nm)}</b><span>${esc(u.email||'')}</span></div></div>
+<div class="kv"><span>로그인 방식</span><span>Google</span></div>
+<div class="kv"><span>가입일</span><span>${fd(m.creationTime)}</span></div>
+<div class="kv"><span>최근 로그인</span><span>${fd(m.lastSignInTime)}</span></div>
+<div class="kv"><span>계정 ID</span><span style="word-break:break-all">${esc(u.uid)}</span></div>
+<button id="lo">로그아웃</button></section>`}
+let rz;onresize=()=>{clearTimeout(rz);rz=setTimeout(()=>V&&render(V),150)};
+</script>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {getFirestore,doc,getDoc,setDoc,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+// ▼▼▼ Firebase 콘솔 > 프로젝트 설정 > 내 앱(웹)에서 복사한 값으로 바꾸세요 ▼▼▼
+const firebaseConfig={
+  apiKey:"AIzaSyD-0ezeqzspBTWBvRKXomeEpg8WomeGaj4",
+  authDomain:"hhholdem-35c0a.firebaseapp.com",
+  projectId:"hhholdem-35c0a",
+  storageBucket:"hhholdem-35c0a.firebasestorage.app",
+  messagingSenderId:"488753090611",
+  appId:"1:488753090611:web:8ad75294065ff3d38d1346"
+};
+// ▲▲▲
+
+const q=s=>document.querySelector(s);
+if(/YOUR_/.test(firebaseConfig.apiKey)){
+  q('#gerr').textContent='firebaseConfig 값을 채워주세요 (index.html 맨 아래)';
+}else{
+  const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),prov=new GoogleAuthProvider();
+  prov.setCustomParameters({prompt:'select_account'});
+  window.FB={
+    save:(uid,d)=>setDoc(doc(db,'users',uid),{...d,updatedAt:serverTimestamp()},{merge:true}),
+    logout:()=>signOut(auth)
+  };
+  q('#gbtn').onclick=async()=>{
+    q('#gerr').textContent='';q('#gbtn').disabled=true;
+    try{await signInWithPopup(auth,prov)}
+    catch(e){
+      if(e.code=='auth/popup-blocked'||e.code=='auth/operation-not-supported-in-this-environment')return signInWithRedirect(auth,prov);
+      if(e.code!='auth/popup-closed-by-user'&&e.code!='auth/cancelled-popup-request')q('#gerr').textContent='로그인에 실패했어요 ('+(e.code||e.message)+')';
+      q('#gbtn').disabled=false;
+    }
+  };
+  onAuthStateChanged(auth,async u=>{
+    if(!u){authOut();return}
+    try{
+      const ref=doc(db,'users',u.uid),snap=await getDoc(ref);let p;
+      const info={displayName:u.displayName||'',email:u.email||'',photoURL:u.photoURL||''};
+      if(snap.exists()){
+        p=snap.data();
+        setDoc(ref,{...info,lastLogin:serverTimestamp()},{merge:true}).catch(()=>{});
+      }else{
+        // 첫 로그인: 이 브라우저에 있던 기존 전적/설정을 계정으로 이전
+        let w=0,st={},nk='';
+        try{w=Math.max(0,Math.min(999999,parseInt(localStorage.hw)||0));st=JSON.parse(localStorage.hs||'{}');nk=localStorage.cn||''}catch(e){}
+        p={wins:w,settings:st,nickname:(nk||u.displayName||'').slice(0,10)};
+        await setDoc(ref,{...p,...info,createdAt:serverTimestamp(),lastLogin:serverTimestamp()});
+        try{localStorage.removeItem('hw')}catch(e){}
+      }
+      authIn(u,p);
+    }catch(e){authFail(e)}
+  });
+}
+</script>
+</body></html>
